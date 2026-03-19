@@ -1,4 +1,4 @@
-import { Global, Module, OnApplicationShutdown, Scope } from '@nestjs/common';
+import { Global, Module, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ModuleRef } from '@nestjs/core';
 import { Redis } from 'ioredis';
@@ -13,7 +13,26 @@ import { RedisService } from './redis.service';
     {
       provide: IORedisKey,
       useFactory: async (configService: ConfigService) => {
-        return new Redis(configService.get('redis'));
+        const redisConfig = configService.get('redis');
+
+        if (!redisConfig.isConfigured) {
+          return null;
+        }
+
+        const client = new Redis({
+          ...redisConfig,
+          lazyConnect: true,
+          maxRetriesPerRequest: 1,
+          enableOfflineQueue: false,
+        });
+
+        try {
+          await client.connect();
+        } catch {
+          return null;
+        }
+
+        return client;
       },
       inject: [ConfigService],
     },
@@ -25,8 +44,14 @@ export class RedisModule implements OnApplicationShutdown {
   constructor(private readonly moduleRef: ModuleRef) {}
 
   async onApplicationShutdown(signal?: string): Promise<void> {
+    void signal;
     return new Promise<void>((resolve) => {
-      const redis = this.moduleRef.get(IORedisKey);
+      const redis = this.moduleRef.get<Redis | null>(IORedisKey);
+      if (!redis) {
+        resolve();
+        return;
+      }
+
       redis.quit();
       redis.on('end', () => {
         resolve();

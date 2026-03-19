@@ -19,31 +19,31 @@ class EnvironmentVariables {
   PORT: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   DB_HOST: string;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   DB_PORT: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   DB_USER: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   DB_PASSWORD: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   DB_NAME: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   REDIS_HOST: string;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   REDIS_PORT: number;
 
   @IsString()
@@ -55,11 +55,11 @@ class EnvironmentVariables {
   REDIS_PASSWORD: string;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   REDIS_DATABASE: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   REDIS_KEY_PREFIX: string;
 
   @IsString()
@@ -71,26 +71,45 @@ class EnvironmentVariables {
   JWT_ACCESS_TOKEN_TTL: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   SWAGGER_SITE_TITLE: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   SWAGGER_DOC_TITLE: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   SWAGGER_DOC_DESCRIPTION: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   SWAGGER_DOC_VERSION: string;
 }
 
 export function validate(config: Record<string, unknown>) {
-  const validatedConfig = plainToInstance(EnvironmentVariables, config, {
-    enableImplicitConversion: true,
-  });
+  const configWithDefaults = {
+    NODE_ENV: config.NODE_ENV || Environment.Development,
+    PORT: config.PORT || 3000,
+    JWT_SECRET: config.JWT_SECRET || 'development-only-secret',
+    JWT_ACCESS_TOKEN_TTL: config.JWT_ACCESS_TOKEN_TTL || 3600,
+    SWAGGER_SITE_TITLE:
+      config.SWAGGER_SITE_TITLE || 'NestJS Authentication API',
+    SWAGGER_DOC_TITLE: config.SWAGGER_DOC_TITLE || 'NestJS Authentication',
+    SWAGGER_DOC_DESCRIPTION:
+      config.SWAGGER_DOC_DESCRIPTION ||
+      'Authentication API running in self-contained mode',
+    SWAGGER_DOC_VERSION: config.SWAGGER_DOC_VERSION || '1.0.0',
+    ...config,
+  };
+
+  const validatedConfig = plainToInstance(
+    EnvironmentVariables,
+    configWithDefaults,
+    {
+      enableImplicitConversion: true,
+    },
+  );
   const errors = validateSync(validatedConfig, {
     skipMissingProperties: false,
   });
