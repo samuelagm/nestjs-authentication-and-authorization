@@ -67,7 +67,7 @@ describe('JwtAuthGuard', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
     jest.spyOn(guard as any, 'getToken').mockReturnValue(undefined);
 
-    await expect(guard.canActivate(mockExecutionContext)).rejects.toThrowError(
+    await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
       new UnauthorizedException('Authorization token is required'),
     );
   });
@@ -77,7 +77,7 @@ describe('JwtAuthGuard', () => {
     jest.spyOn(guard as any, 'getToken').mockReturnValue('invalid-token');
     jest.spyOn(redisService, 'validate').mockResolvedValue(false);
 
-    await expect(guard.canActivate(mockExecutionContext)).rejects.toThrowError(
+    await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(
       new UnauthorizedException('Authorization token is not valid'),
     );
   });

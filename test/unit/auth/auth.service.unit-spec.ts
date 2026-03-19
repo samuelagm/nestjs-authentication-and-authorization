@@ -80,11 +80,14 @@ describe('AuthService', () => {
     });
 
     it('should throw a ConflictException if a user with the same email already exists', async () => {
+      jest
+        .spyOn(bcryptService, 'hash')
+        .mockResolvedValueOnce('hashed_password');
       const saveSpy = jest
         .spyOn(userRepository, 'save')
         .mockRejectedValueOnce({ code: MysqlErrorCode.UniqueViolation });
 
-      await expect(authService.signUp(signUpDto)).rejects.toThrowError(
+      await expect(authService.signUp(signUpDto)).rejects.toThrow(
         new ConflictException(`User [${signUpDto.email}] already exist`),
       );
 
@@ -92,11 +95,14 @@ describe('AuthService', () => {
     });
 
     it('should rethrow any other error that occurs during signup', async () => {
+      jest
+        .spyOn(bcryptService, 'hash')
+        .mockResolvedValueOnce('hashed_password');
       const saveSpy = jest
         .spyOn(userRepository, 'save')
         .mockRejectedValueOnce(new Error('Unexpected error'));
 
-      await expect(authService.signUp(signUpDto)).rejects.toThrowError(
+      await expect(authService.signUp(signUpDto)).rejects.toThrow(
         new Error('Unexpected error'),
       );
 

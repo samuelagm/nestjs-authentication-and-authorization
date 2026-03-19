@@ -24,6 +24,8 @@ export class AppFactory {
   }
 
   static async new() {
+    AppFactory.configureTestEnvironment();
+
     const module = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -51,6 +53,26 @@ export class AppFactory {
     const redis = module.get<Redis>(IORedisKey);
 
     return new AppFactory(app, dataSource, redis);
+  }
+
+  private static configureTestEnvironment() {
+    process.env.NODE_ENV ??= 'test';
+    process.env.PORT ??= '3001';
+    process.env.DB_HOST ??= '127.0.0.1';
+    process.env.DB_PORT ??= '3306';
+    process.env.DB_USER ??= 'admin';
+    process.env.DB_PASSWORD ??= 'test123!';
+    process.env.DB_NAME ??= 'nestjs-auth';
+    process.env.REDIS_HOST ??= '127.0.0.1';
+    process.env.REDIS_PORT ??= '6379';
+    process.env.REDIS_DATABASE ??= '1';
+    process.env.REDIS_KEY_PREFIX ??= 'nestjs-auth-test';
+    process.env.JWT_SECRET ??= 'test-secret';
+    process.env.JWT_ACCESS_TOKEN_TTL ??= '3600';
+    process.env.SWAGGER_SITE_TITLE ??= 'NestJS Auth Test';
+    process.env.SWAGGER_DOC_TITLE ??= 'NestJS Auth Test';
+    process.env.SWAGGER_DOC_DESCRIPTION ??= 'NestJS Auth Test';
+    process.env.SWAGGER_DOC_VERSION ??= '1.0';
   }
 
   async close() {

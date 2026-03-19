@@ -1,9 +1,7 @@
-/* eslint-disable */
 export default async () => {
   const t = {
-    ['./users/entities/user.entity']: await import(
-      './users/entities/user.entity'
-    ),
+    ['./users/entities/user.entity']:
+      await import('./users/entities/user.entity'),
   };
   return {
     '@nestjs/swagger': {
@@ -23,7 +21,12 @@ export default async () => {
           import('./auth/dto/sign-in.dto'),
           {
             SignInDto: {
-              email: { required: true, type: () => String, maxLength: 255 },
+              email: {
+                required: true,
+                type: () => String,
+                maxLength: 255,
+                format: 'email',
+              },
               password: {
                 required: true,
                 type: () => String,
@@ -39,7 +42,12 @@ export default async () => {
           import('./auth/dto/sign-up.dto'),
           {
             SignUpDto: {
-              email: { required: true, type: () => String, maxLength: 255 },
+              email: {
+                required: true,
+                type: () => String,
+                maxLength: 255,
+                format: 'email',
+              },
               password: {
                 required: true,
                 type: () => String,
